@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # 1. Наш веб-сайт (Django)
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000 # Для разработки используем runserver
+    volumes:
+      - .:/app # "Живое" обновление кода
+      - C:\git-data-local:/git-data # Подключаем папку с репо (Windows путь)
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_HOST=host.docker.internal
+      - DB_PORT=12345
+      - DB_NAME=git_forum
+      - DB_USER=mushi
+      - DB_PASS=ВАШ_ПАРОЛЬ
+      - CELERY_BROKER_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+
+  # 2. Обработчик задач (Celery Worker)
+  worker:
+    build: .
+    command: celery -A config worker -l info
+    volumes:
+      - .:/app
+      - C:\git-data-local:/git-data
+    environment:
+      - DB_HOST=host.docker.internal
+      - DB_PORT=12345
+      - DB_NAME=git_forum
+      - DB_USER=mushi
+      - DB_PASS=ВАШ_ПАРОЛЬ
+      - CELERY_BROKER_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+
+  # 3. Брокер сообщений (Redis)
+  redis:
+    image: redis:alpine

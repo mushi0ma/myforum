@@ -8,3 +8,9 @@ redis==5.0.1
 gunicorn==21.2.0
 whitenoise==6.6.0
 django-compressor==4.4
+
+# API & Utils
+djangorestframework==3.14.0
+django-cors-headers==4.3.1
+django-filter==23.5
+drf-spectacular==0.27.1

@@ -25,6 +25,8 @@ INSTALLED_APPS = [
     'drf_spectacular',
 
     # Наше приложение
+    'taggit',
+    'forum',
     'core',
 ]
 

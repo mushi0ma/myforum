@@ -8,4 +8,5 @@ router.register(r'commits', CommitViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('accounts/', include('allauth.urls')),
 ]

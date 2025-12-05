@@ -1,68 +1,137 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
+@import "tailwindcss";
+
+/* Font Faces */
+@font-face {
+  font-family: 'Reddit Sans Chocolate';
+  src: url('/fonts/RedditSansChocolate-Regular.ttf') format('truetype');
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  font-style: normal;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+@font-face {
+  font-family: 'Reddit Sans Chocolate';
+  src: url('/fonts/RedditSansChocolate-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
 }
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+@font-face {
+  font-family: 'Reddit Sans Chocolate';
+  src: url('/fonts/RedditSansChocolate-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+@font-face {
+  font-family: 'Reddit Sans Chocolate';
+  src: url('/fonts/RedditSansChocolate-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+@font-face {
+  font-family: 'Monaspace Xenon';
+  src: url('/fonts/Monaspace Xenon/MonaspaceXenon-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
 }
 
-@media (prefers-color-scheme: light) {
+@font-face {
+  font-family: 'Monaspace Xenon';
+  src: url('/fonts/Monaspace Xenon/MonaspaceXenon-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Monaspace Xenon';
+  src: url('/fonts/Monaspace Xenon/MonaspaceXenon-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+}
+
+@layer base {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    --font-size: 16px;
+
+    /* New Dark Mode Color Scheme */
+    --color-black: #000000;
+    --color-dark-1: #1a1d1f;
+    --color-dark-2: #333637;
+    --color-gray: #656869;
+    --color-white: #ffffff;
+
+    /* GitHub Accent Colors (keeping these for accents) */
+    --gh-accent-emphasis: #1f6feb;
+    --gh-accent-fg: #58a6ff;
+    --gh-accent-subtle: rgba(88, 166, 255, 0.15);
+    --gh-success-emphasis: #238636;
+    --gh-success-fg: #3fb950;
+
+    --background: var(--color-black);
+    --foreground: var(--color-white);
+    --card: var(--color-dark-1);
+    --card-foreground: var(--color-white);
+    --border: var(--color-dark-2);
+    --input: var(--color-dark-1);
+    --muted-foreground: var(--color-gray);
+    --ring: var(--gh-accent-fg);
+    --radius: .5rem;
   }
-  a:hover {
-    color: #747bff;
+
+  * {
+    border-color: var(--border);
+    outline-color: var(--ring);
   }
-  button {
-    background-color: #f9f9f9;
+
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-size: var(--font-size);
+    font-family: 'Reddit Sans Chocolate', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+
+  html {
+    font-size: var(--font-size);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Monaspace Xenon', 'Reddit Sans Chocolate', monospace;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .bg-gradient-radial {
+    background-image: radial-gradient(circle at center, var(--tw-gradient-stops));
+  }
+
+  /* Animated gradient utilities */
+  .bg-size-200 {
+    background-size: 200%;
+  }
+
+  .bg-pos-0 {
+    background-position: 0% center;
+  }
+
+  .bg-pos-100 {
+    background-position: 100% center;
+  }
+}
+
+/* Fix autocomplete styling for dark theme */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: #ffffff !important;
+  transition: background-color 5000s ease-in-out 0s;
+  box-shadow: inset 0 0 20px 20px #000000 !important;
 }

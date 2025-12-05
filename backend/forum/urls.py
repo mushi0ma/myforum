@@ -8,4 +8,5 @@ router.register(r'comments', ForumCommentViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('accounts/', include('allauth.urls')),
 ]

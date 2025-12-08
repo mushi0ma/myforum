@@ -5,7 +5,7 @@ import logo from '@/assets/GitForum logo.svg';
 import googleLogo from '@/assets/Google_Symbol_0.svg';
 import githubLogo from '@/assets/github-mark-white.svg';
 import gitlabLogo from '@/assets/gitlab-icon.svg';
-import redditLogo from '@/assets/Reddit_Icon_2Color.svg';
+import discordLogo from '@/assets/Discord-Symbol-Blurple.svg';
 import { Link } from 'react-router-dom';
 
 export default function Login() {
@@ -110,11 +110,10 @@ export default function Login() {
                   value={email}
                   onChange={handleEmailChange}
                   placeholder="Введите email или имя"
-                  className={`w-full bg-[#000000] border rounded-lg pl-12 pr-4 py-3.5 text-[#ffffff] placeholder-[#656869] focus:outline-none transition-all ${
-                    emailError
+                  className={`w-full bg-[#000000] border rounded-lg pl-12 pr-4 py-3.5 text-[#ffffff] placeholder-[#656869] focus:outline-none transition-all ${emailError
                       ? 'border-[#da3633] focus:border-[#da3633] focus:ring-2 focus:ring-[#da3633]/30'
                       : 'border-[#333637] focus:border-[#58a6ff] focus:ring-2 focus:ring-[#58a6ff]/30'
-                  }`}
+                    }`}
                 />
               </div>
               {emailError && (
@@ -199,24 +198,24 @@ export default function Login() {
 
             {/* Social Login Buttons - 2x2 Grid */}
             <div className="grid grid-cols-2 gap-3">
-              <button className="group/social bg-[#000000] border border-[#333637] hover:border-[#58a6ff] text-[#ffffff] hover:text-[#58a6ff] py-3.5 rounded-lg flex items-center justify-center gap-2.5 transition-all duration-300 hover:shadow-lg hover:shadow-[#58a6ff]/20">
+              <button onClick={() => window.location.href = 'http://34.66.184.215.nip.io/api/forum/accounts/google/login/'} className="group/social bg-[#000000] border border-[#333637] hover:border-[#58a6ff] text-[#ffffff] hover:text-[#58a6ff] py-3.5 rounded-lg flex items-center justify-center gap-2.5 transition-all duration-300 hover:shadow-lg hover:shadow-[#58a6ff]/20">
                 <img src={googleLogo} alt="Google" className="w-5 h-5 flex-shrink-0 transition-all duration-300 group-hover/social:scale-110" />
                 <span className="text-sm font-medium leading-none">Google</span>
               </button>
 
-              <button className="group/social bg-[#000000] border border-[#333637] hover:border-[#58a6ff] text-[#ffffff] hover:text-[#58a6ff] py-3.5 rounded-lg flex items-center justify-center gap-2.5 transition-all duration-300 hover:shadow-lg hover:shadow-[#58a6ff]/20">
+              <button onClick={() => window.location.href = 'http://34.66.184.215.nip.io/api/forum/accounts/github/login/'} className="group/social bg-[#000000] border border-[#333637] hover:border-[#58a6ff] text-[#ffffff] hover:text-[#58a6ff] py-3.5 rounded-lg flex items-center justify-center gap-2.5 transition-all duration-300 hover:shadow-lg hover:shadow-[#58a6ff]/20">
                 <img src={githubLogo} alt="GitHub" className="w-5 h-5 flex-shrink-0 transition-all duration-300 group-hover/social:scale-110" />
                 <span className="text-sm font-medium leading-none">GitHub</span>
               </button>
 
-              <button className="group/social bg-[#000000] border border-[#333637] hover:border-[#58a6ff] text-[#ffffff] hover:text-[#58a6ff] py-3.5 rounded-lg flex items-center justify-center gap-2.5 transition-all duration-300 hover:shadow-lg hover:shadow-[#58a6ff]/20">
+              <button onClick={() => window.location.href = 'http://34.66.184.215.nip.io/api/forum/accounts/gitlab/login/'} className="group/social bg-[#000000] border border-[#333637] hover:border-[#58a6ff] text-[#ffffff] hover:text-[#58a6ff] py-3.5 rounded-lg flex items-center justify-center gap-2.5 transition-all duration-300 hover:shadow-lg hover:shadow-[#58a6ff]/20">
                 <img src={gitlabLogo} alt="GitLab" className="w-5 h-5 flex-shrink-0 transition-all duration-300 group-hover/social:scale-110" />
                 <span className="text-sm font-medium leading-none">GitLab</span>
               </button>
 
-              <button className="group/social bg-[#000000] border border-[#333637] hover:border-[#58a6ff] text-[#ffffff] hover:text-[#58a6ff] py-3.5 rounded-lg flex items-center justify-center gap-2.5 transition-all duration-300 hover:shadow-lg hover:shadow-[#58a6ff]/20">
-                <img src={redditLogo} alt="Reddit" className="w-5 h-5 flex-shrink-0 transition-all duration-300 group-hover/social:scale-110" />
-                <span className="text-sm font-medium leading-none">Reddit</span>
+              <button onClick={() => window.location.href = 'http://34.66.184.215.nip.io/api/forum/accounts/discord/login/'} className="group/social bg-[#000000] border border-[#333637] hover:border-[#58a6ff] text-[#ffffff] hover:text-[#58a6ff] py-3.5 rounded-lg flex items-center justify-center gap-2 transition-all duration-300 hover:shadow-lg hover:shadow-[#58a6ff]/20">
+                <img src={discordLogo} alt="Discord" className="w-5 h-5 flex-shrink-0 object-contain transition-all duration-300 group-hover/social:scale-110" />
+                <span className="text-sm font-medium leading-none">Discord</span>
               </button>
             </div>
           </div>

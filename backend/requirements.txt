@@ -12,6 +12,7 @@ django-allauth==0.63.3
 requests==2.31.0
 PyJWT==2.8.0
 cryptography==42.0.4
+# pyjwt[crypto] уже включен в PyJWT, но можно оставить для явности
 pyjwt[crypto]==2.8.0
 
 # API & Utils
@@ -20,3 +21,7 @@ django-cors-headers==4.3.1
 django-filter==23.5
 drf-spectacular==0.27.1
 django-taggit==5.0.1
+
+# Auth API (Вставка для React)
+dj-rest-auth==5.0.2
+djangorestframework-simplejwt==5.3.1

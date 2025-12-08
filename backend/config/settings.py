@@ -3,11 +3,10 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# СЕКРЕТЫ (Берем из .env файла или дефолт)
+# СЕКРЕТЫ
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-change-me-in-prod')
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = True
 
-# Разрешаем все хосты, так как Nginx нас прикрывает
 ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
@@ -17,17 +16,24 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sites", 
+
+    # Allauth
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.github',
     'allauth.socialaccount.providers.gitlab',
-    'allauth.socialaccount.providers.reddit',
+    'allauth.socialaccount.providers.discord',
     
-    
+    # API Auth
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
+
     # Сторонние библиотеки
     'rest_framework',
+    'rest_framework.authtoken',
     'corsheaders',
     'django_filters',
     'drf_spectacular',
@@ -40,9 +46,9 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware", # Статика
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "corsheaders.middleware.CorsMiddleware",      # CORS (Должен быть высоко!)
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -70,7 +76,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-# БАЗА ДАННЫХ (PostgreSQL)
+# БАЗА ДАННЫХ
 if os.environ.get('DB_HOST'):
     DATABASES = {
         'default': {
@@ -83,7 +89,6 @@ if os.environ.get('DB_HOST'):
         }
     }
 else:
-    # Fallback (чтобы не падало при сборке Docker образа без env)
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -103,7 +108,6 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-# СТАТИКА
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
@@ -120,6 +124,11 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ),
 }
 
 # SWAGGER
@@ -132,3 +141,63 @@ SPECTACULAR_SETTINGS = {
 
 # CORS  
 CORS_ALLOW_ALL_ORIGINS = True
+
+SITE_ID = 1 
+
+# settings.py
+
+SOCIALACCOUNT_PROVIDERS = {
+    'discord': {
+        'SCOPE': ['identify', 'email'],
+        'AUTH_PARAMS': {'prompt': 'none'},
+    },
+    'github': {
+        'SCOPE': [
+            'user',
+            'user:email',
+        ],
+    },
+    'gitlab': {
+        'SCOPE': ['read_user', 'openid', 'profile', 'email'],
+    },
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        }
+    }
+}
+
+# Бэкенды авторизации
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+# --- НАСТРОЙКИ ALLAUTH (ОБНОВЛЕННЫЕ) ---
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = True 
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_VERIFICATION = 'none'  # Отключаем обязательную верификацию email для скорости
+
+# ГЛАВНАЯ МАГИЯ: Автоматически создавать аккаунт, минуя формы
+SOCIALACCOUNT_AUTO_SIGNUP = True 
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
+
+# Куда редиректить после успешного входа
+LOGIN_REDIRECT_URL = '/main'
+SOCIALACCOUNT_LOGIN_ON_GET = True
+
+# Настройки dj-rest-auth
+REST_USE_JWT = True
+JWT_AUTH_COOKIE = 'gitforum-auth'
+
+# Сеть и прокси
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'http')

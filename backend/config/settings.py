@@ -9,6 +9,26 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
+# settings.py
+
+# Подключение к контейнеру redis, описанному в docker-compose
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://redis:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+
+# Говорим Django хранить сессии в кэше (Redis)
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
+
+# Время жизни сессии (2 недели)
+SESSION_COOKIE_AGE = 1209600
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -62,7 +82,8 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        # ВАЖНО: Указываем путь к папке templates в корне проекта
+        "DIRS": [BASE_DIR / 'templates'],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -144,30 +165,27 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 SITE_ID = 1 
 
-# settings.py
-
+# --- НАСТРОЙКИ ПРОВАЙДЕРОВ ---
+# Мы добавляем 'VERIFIED_EMAIL': True, чтобы доверять почте от провайдеров
+# и позволить автоматическое объединение аккаунтов.
 SOCIALACCOUNT_PROVIDERS = {
     'discord': {
         'SCOPE': ['identify', 'email'],
         'AUTH_PARAMS': {'prompt': 'none'},
+        'VERIFIED_EMAIL': True, 
     },
     'github': {
-        'SCOPE': [
-            'user',
-            'user:email',
-        ],
+        'SCOPE': ['user', 'user:email'],
+        'VERIFIED_EMAIL': True,
     },
     'gitlab': {
         'SCOPE': ['read_user', 'openid', 'profile', 'email'],
+        'VERIFIED_EMAIL': True,
     },
     'google': {
-        'SCOPE': [
-            'profile',
-            'email',
-        ],
-        'AUTH_PARAMS': {
-            'access_type': 'online',
-        }
+        'SCOPE': ['profile', 'email'],
+        'AUTH_PARAMS': {'access_type': 'online'},
+        'VERIFIED_EMAIL': True,
     }
 }
 
@@ -177,18 +195,24 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-# --- НАСТРОЙКИ ALLAUTH (ОБНОВЛЕННЫЕ) ---
+# 1. Автоматическое связывание аккаунтов по Email
+# Если email от Google совпадает с email в базе -> пускаем сразу.
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+
+# 2. Основные настройки аккаунта
 ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = True       # Запрещаем дубли email
 ACCOUNT_USERNAME_REQUIRED = True 
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_VERIFICATION = 'none'  # Отключаем обязательную верификацию email для скорости
+ACCOUNT_EMAIL_VERIFICATION = 'none' # Для скорости (можно поменять на 'optional' позже)
 
-# ГЛАВНАЯ МАГИЯ: Автоматически создавать аккаунт, минуя формы
+# 3. Бесшовный вход
 SOCIALACCOUNT_AUTO_SIGNUP = True 
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
 
 # Куда редиректить после успешного входа
 LOGIN_REDIRECT_URL = '/main'
+# Вход по GET запросу (для ссылок в кнопках)
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
 # Настройки dj-rest-auth
@@ -201,3 +225,12 @@ CSRF_COOKIE_SECURE = False
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'http')
+
+# Важно для сохранения сессии при переходах между Django и React
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
+
+# Убираем Strict, чтобы при редиректе с GitHub кука сессии не терялась
+SESSION_COOKIE_SECURE = False  # Так как у вас пока http (без SSL)
+
+SOCIALACCOUNT_ADAPTER = 'core.adapters.MySocialAccountAdapter'

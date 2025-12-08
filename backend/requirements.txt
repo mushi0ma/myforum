@@ -5,6 +5,7 @@ gitpython==3.1.41
 pillow==10.2.0
 celery==5.3.6
 redis==5.0.1
+django-redis==5.4.0
 gunicorn==21.2.0
 whitenoise==6.6.0
 django-compressor==4.4

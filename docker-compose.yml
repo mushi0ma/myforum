@@ -22,30 +22,40 @@ services:
 
   # 3. BACKEND (Django)
   web:
-    build: ./backend  # <-- Исправлено: ищем в папке backend
+    build: ./backend
     command: gunicorn config.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - ./backend:/app
-      - /mnt/git-data:/git-data # <-- Исправлено: путь Linux
+      - /mnt/git-data:/git-data
       - static_volume:/app/staticfiles
+    # 👇 ИСПРАВЛЕНО: Указываем точный путь к файлу внутри папки backend
+    env_file:
+      - ./backend/.env
     environment:
+      # Оставляем настройки БД (они переопределят .env, если отличаются)
       - DB_HOST=34.41.176.77
       - DB_PORT=5432
       - DB_NAME=git_forum
       - DB_USER=mushi
       - DB_PASS=Mushi_zynq1
       - CELERY_BROKER_URL=redis://redis:6379/0
+      # 👇 УБРАЛИ N8N переменные отсюда. 
+      # Docker сам возьмет их из env_file выше.
     depends_on:
       - redis
 
   # 4. WORKER
   worker:
-    build: ./backend  # <-- Исправлено
+    build: ./backend
     command: celery -A config worker -l info
     volumes:
       - ./backend:/app
-      - /mnt/git-data:/git-data # <-- Исправлено
+      - /mnt/git-data:/git-data
+    # 👇 ИСПРАВЛЕНО: Точный путь
+    env_file:
+      - ./backend/.env
     environment:
+      # Тоже убрали лишнее, оставили только системные переменные
       - DB_HOST=34.41.176.77
       - DB_PORT=5432
       - DB_NAME=git_forum

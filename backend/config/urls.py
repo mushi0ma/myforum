@@ -14,8 +14,12 @@ urlpatterns = [
     # === OAUTH (для редиректов Google/GitHub) ===
     path('accounts/', include('allauth.urls')),
 
-    # === БИЗНЕС-ЛОГИКА ===
+    # === БИЗНЕС-ЛОГИКА И ИНСТРУМЕНТЫ ===
+    # Подключаем core.urls, где лежат repos/, commits/ и tools/ (AI)
+    # Итоговые пути будут: /api/repos/, /api/tools/generate-commit/ и т.д.
     path('api/', include('core.urls')),
+    
+    # Форум (посты, комментарии)
     path('api/forum/', include('forum.urls')),
 
     # === ДОКУМЕНТАЦИЯ (Swagger) ===

@@ -9,9 +9,25 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
-# settings.py
+# === CORS (ВАЖНО ДЛЯ REACT) ===
+# Разрешаем запросы с любых доменов (для разработки)
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+# Разрешаем заголовки, которые использует n8n client
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'x-auth-token', # Наш кастомный заголовок для n8n (если вдруг фронт будет слать его)
+]
 
-# Подключение к контейнеру redis, описанному в docker-compose
+# === REDIS & CACHE ===
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
@@ -22,12 +38,10 @@ CACHES = {
     }
 }
 
-# Говорим Django хранить сессии в кэше (Redis)
+# Сессии в Redis
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"
-
-# Время жизни сессии (2 недели)
-SESSION_COOKIE_AGE = 1209600
+SESSION_COOKIE_AGE = 1209600 # 2 недели
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -68,7 +82,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
+    "corsheaders.middleware.CorsMiddleware", # CORS должен быть высоко
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -82,7 +96,6 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        # ВАЖНО: Указываем путь к папке templates в корне проекта
         "DIRS": [BASE_DIR / 'templates'],
         "APP_DIRS": True,
         "OPTIONS": {
@@ -160,14 +173,9 @@ SPECTACULAR_SETTINGS = {
     'SERVE_INCLUDE_SCHEMA': False,
 }
 
-# CORS  
-CORS_ALLOW_ALL_ORIGINS = True
-
 SITE_ID = 1 
 
-# --- НАСТРОЙКИ ПРОВАЙДЕРОВ ---
-# Мы добавляем 'VERIFIED_EMAIL': True, чтобы доверять почте от провайдеров
-# и позволить автоматическое объединение аккаунтов.
+# --- SOCIAL ACCOUNT PROVIDERS ---
 SOCIALACCOUNT_PROVIDERS = {
     'discord': {
         'SCOPE': ['identify', 'email'],
@@ -189,48 +197,34 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-# Бэкенды авторизации
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-# 1. Автоматическое связывание аккаунтов по Email
-# Если email от Google совпадает с email в базе -> пускаем сразу.
+# --- ALLAUTH CONFIG ---
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
-
-# 2. Основные настройки аккаунта
 ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_UNIQUE_EMAIL = True       # Запрещаем дубли email
+ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USERNAME_REQUIRED = True 
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_VERIFICATION = 'none' # Для скорости (можно поменять на 'optional' позже)
-
-# 3. Бесшовный вход
+ACCOUNT_EMAIL_VERIFICATION = 'none'
 SOCIALACCOUNT_AUTO_SIGNUP = True 
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
-
-# Куда редиректить после успешного входа
 LOGIN_REDIRECT_URL = '/main'
-# Вход по GET запросу (для ссылок в кнопках)
 SOCIALACCOUNT_LOGIN_ON_GET = True
+SOCIALACCOUNT_ADAPTER = 'core.adapters.MySocialAccountAdapter'
 
-# Настройки dj-rest-auth
+# --- JWT & COOKIES ---
 REST_USE_JWT = True
 JWT_AUTH_COOKIE = 'gitforum-auth'
 
-# Сеть и прокси
-SESSION_COOKIE_SECURE = False
+# --- NETWORK & SECURITY ---
+# Разрешаем кукам "гулять" свободнее, чтобы сессия не терялась при редиректах OAuth
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SECURE = False  # Пока нет HTTPS
 CSRF_COOKIE_SECURE = False
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'http')
-
-# Важно для сохранения сессии при переходах между Django и React
-SESSION_COOKIE_SAMESITE = 'Lax'
-CSRF_COOKIE_SAMESITE = 'Lax'
-
-# Убираем Strict, чтобы при редиректе с GitHub кука сессии не терялась
-SESSION_COOKIE_SECURE = False  # Так как у вас пока http (без SSL)
-
-SOCIALACCOUNT_ADAPTER = 'core.adapters.MySocialAccountAdapter'

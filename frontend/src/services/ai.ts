@@ -1,5 +1,6 @@
-// frontend/src/services/ai.ts
-const API_URL = '/api/tools'; // Nginx проксирует это на бэкенд
+import Cookies from 'js-cookie';
+
+const API_URL = '/api/tools';
 
 interface CommitResponse {
   message: string;
@@ -10,15 +11,19 @@ interface CodeReviewResponse {
   markdown: string;
 }
 
-// Хелпер для заголовков (берет токен из cookies/localStorage, если используете dj-rest-auth)
 const getHeaders = () => {
-  // Если используете cookies (credentials: include), токен можно не слать явно.
-  // Но если храните в localStorage:
-  // const token = localStorage.getItem('token');
-  return {
+  const headers: HeadersInit = {
     'Content-Type': 'application/json',
-    // 'Authorization': `Token ${token}`, 
   };
+
+  // Используем библиотеку js-cookie для получения токена
+  const csrftoken = Cookies.get('csrftoken');
+
+  if (csrftoken) {
+    headers['X-CSRFToken'] = csrftoken;
+  }
+
+  return headers;
 };
 
 export const aiService = {
@@ -28,10 +33,18 @@ export const aiService = {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify({ filename, diff }),
+      credentials: 'include',
     });
 
+    if (response.status === 403) {
+      throw new Error('Forbidden: Ошибка доступа или CSRF. Убедитесь, что вы вошли в систему.');
+    }
+    if (response.status === 401) {
+      throw new Error('Вы не авторизованы. Пожалуйста, войдите в систему.');
+    }
+
     if (!response.ok) throw new Error('AI Generation failed');
-    
+
     const data: CommitResponse = await response.json();
     return data.message;
   },
@@ -42,10 +55,18 @@ export const aiService = {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify({ filename, diff, lang }),
+      credentials: 'include',
     });
+
+    if (response.status === 403) {
+      throw new Error('Forbidden: Ошибка доступа или CSRF. Убедитесь, что вы вошли в систему.');
+    }
+    if (response.status === 401) {
+      throw new Error('Вы не авторизованы. Пожалуйста, войдите в систему.');
+    }
 
     if (!response.ok) throw new Error('AI Review failed');
 
-    return await response.json(); // Возвращает { issues: [], markdown: "..." }
+    return await response.json();
   }
 };

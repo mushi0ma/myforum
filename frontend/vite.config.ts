@@ -18,10 +18,25 @@ export default defineConfig({
     outDir: 'dist',
   },
   server: {
-    host: true, 
+    host: true,
     port: 3000,
     strictPort: true,
     open: false,
-    allowedHosts: true
+    allowedHosts: true, // Разрешаем доступ по любым хостам (для Docker)
+
+    // 👇 ГЛАВНАЯ ЧАСТЬ: ПРОКСИРОВАНИЕ ЗАПРОСОВ НА БЭКЕНД
+    proxy: {
+      '/api': {
+        target: 'http://web:8000', // 'web' - это имя сервиса Django в docker-compose
+        changeOrigin: true,
+        secure: false,
+      },
+      // Также проксируем пути авторизации (Allauth)
+      '/accounts': {
+        target: 'http://web:8000',
+        changeOrigin: true,
+        secure: false,
+      }
+    },
   },
 });

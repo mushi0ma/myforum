@@ -228,3 +228,10 @@ CSRF_COOKIE_SECURE = False
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'http')
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://34.66.184.215.nip.io",
+    "https://34.66.184.215.nip.io",
+]

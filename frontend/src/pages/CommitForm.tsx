@@ -1,109 +1,137 @@
 import { useState } from 'react';
-import { CommitGenerator } from '@/components/ai/CommitGenerator'; // Убедитесь в пути
-import { ReviewReport } from '@/components/ai/ReviewReport';       // Убедитесь в пути
-import { aiService } from '@/services/ai';                         // Убедитесь в пути
+import { CommitGenerator } from '@/components/ai/CommitGenerator';
+import { ReviewReport } from '@/components/ai/ReviewReport';
+import { aiService } from '@/services/ai';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { FileCode, ShieldCheck, GitCommitHorizontal, Loader2 } from 'lucide-react';
 
-export default function TestAIPage() {
-    // Состояние для эмуляции "изменений в файлах"
+export default function CommitForm() {
+    // Mock Data
     const [filename, setFilename] = useState('src/auth/login.js');
-    const [diff, setDiff] = useState('const PASSWORD = "123"; // TODO: Fix hardcode');
+    const [diff, setDiff] = useState(`// TODO: Remove this before prod
+const ADMIN_PASS = "123456"; 
 
-    // Состояние для результатов
+function login(user, pass) {
+  if (pass === ADMIN_PASS) {
+    return true;
+  }
+  return false;
+}`);
+
     const [commitMessage, setCommitMessage] = useState('');
     const [reviewResult, setReviewResult] = useState<{ issues: any[], markdown: string } | null>(null);
     const [isReviewing, setIsReviewing] = useState(false);
 
-    // Обработчик ревью
     const handleReview = async () => {
         setIsReviewing(true);
+        setReviewResult(null);
         try {
-            // Вызываем наш сервис (который дергает Django -> n8n -> AI)
             const result = await aiService.runCodeReview(filename, diff);
             setReviewResult(result);
         } catch (e) {
-            alert('Ошибка ревью');
+            console.error(e);
+            alert('Ошибка соединения с AI сервисом');
         } finally {
             setIsReviewing(false);
         }
     };
 
     return (
-        <div className="max-w-4xl mx-auto p-8 space-y-8 text-white">
-            <h1 className="text-3xl font-mono font-bold mb-6">🕵️‍♂️ GitForum AI Tools Test</h1>
+        <div className="min-h-[calc(100vh-4rem)] bg-[#0d1117] text-[#c9d1d9] p-6 font-sans">
+            <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* === ЛЕВАЯ КОЛОНКА: ИМИТАЦИЯ РЕДАКТОРА === */}
-                <div className="space-y-4">
-                    <Card className="bg-[#0d1117] border-[#333637]">
-                        <CardHeader>
-                            <CardTitle className="text-sm font-mono text-[#656869]">Code Editor (Simulation)</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div>
-                                <label className="text-xs text-[#656869] mb-1 block">Filename</label>
-                                <input
-                                    value={filename}
-                                    onChange={(e) => setFilename(e.target.value)}
-                                    className="w-full bg-[#000] border border-[#333637] rounded px-3 py-2 text-sm text-white font-mono"
-                                />
-                            </div>
-                            <div>
-                                <label className="text-xs text-[#656869] mb-1 block">Git Diff / Code Content</label>
-                                <Textarea
-                                    value={diff}
-                                    onChange={(e) => setDiff(e.target.value)}
-                                    className="bg-[#000] border-[#333637] font-mono text-xs h-40 text-green-400"
-                                />
-                            </div>
-                        </CardContent>
+                {/* === LEFT COLUMN: CODE EDITOR === */}
+                <div className="lg:col-span-2 space-y-4">
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-xl font-semibold flex items-center gap-2">
+                            <FileCode className="text-[#58a6ff]" />
+                            Changes
+                        </h2>
+                        <Badge variant="outline" className="border-[#30363d] text-[#8b949e]">
+                            Unstaged
+                        </Badge>
+                    </div>
+
+                    <Card className="bg-[#161b22] border-[#30363d] overflow-hidden">
+                        <div className="bg-[#21262d] px-4 py-2 border-b border-[#30363d] flex gap-2">
+                            <input
+                                value={filename}
+                                onChange={(e) => setFilename(e.target.value)}
+                                className="bg-transparent border-none text-sm font-mono text-[#c9d1d9] w-full focus:outline-none"
+                            />
+                        </div>
+                        <Textarea
+                            value={diff}
+                            onChange={(e) => setDiff(e.target.value)}
+                            className="w-full h-[500px] bg-[#0d1117] text-[#c9d1d9] border-none font-mono text-sm resize-none focus-visible:ring-0 p-4 leading-relaxed"
+                            spellCheck={false}
+                        />
                     </Card>
-
-                    {/* Кнопка запуска Ревью */}
-                    <Button
-                        onClick={handleReview}
-                        disabled={isReviewing}
-                        className="w-full bg-[#1f6feb] hover:bg-[#388bfd] text-white"
-                    >
-                        {isReviewing ? 'Analyzing...' : 'Run Security Audit 🛡️'}
-                    </Button>
                 </div>
 
-                {/* === ПРАВАЯ КОЛОНКА: РЕЗУЛЬТАТЫ === */}
+                {/* === RIGHT COLUMN: AI TOOLS === */}
                 <div className="space-y-6">
 
-                    {/* 1. Блок Генерации Коммита */}
-                    <Card className="bg-[#161b22] border-[#333637]">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-semibold text-white">Commit Message</CardTitle>
+                    {/* COMMIT GENERATOR */}
+                    <Card className="bg-[#161b22] border-[#30363d]">
+                        <CardHeader className="border-b border-[#30363d] py-3">
+                            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                                <GitCommitHorizontal size={18} />
+                                Commit Message
+                            </CardTitle>
                         </CardHeader>
-                        <CardContent>
-                            <div className="flex gap-2 mb-2">
-                                <Textarea
-                                    value={commitMessage}
-                                    onChange={(e) => setCommitMessage(e.target.value)}
-                                    placeholder="Enter commit message..."
-                                    className="bg-[#0d1117] border-[#333637] min-h-[80px]"
+                        <CardContent className="p-4 space-y-4">
+                            <Textarea
+                                value={commitMessage}
+                                onChange={(e) => setCommitMessage(e.target.value)}
+                                placeholder="Enter commit message..."
+                                className="bg-[#0d1117] border-[#30363d] min-h-[100px] text-sm"
+                            />
+                            <div className="flex justify-end">
+                                <CommitGenerator
+                                    filename={filename}
+                                    diff={diff}
+                                    onGenerate={setCommitMessage}
                                 />
                             </div>
-                            {/* НАША МАГИЧЕСКАЯ КНОПКА */}
-                            <CommitGenerator
-                                filename={filename}
-                                diff={diff}
-                                onGenerate={setCommitMessage}
-                            />
                         </CardContent>
                     </Card>
 
-                    {/* 2. Блок Отчета Ревью */}
-                    {reviewResult && (
-                        <ReviewReport
-                            markdown={reviewResult.markdown}
-                            issuesCount={reviewResult.issues.length}
-                        />
-                    )}
+                    {/* CODE REVIEWER */}
+                    <Card className="bg-[#161b22] border-[#30363d]">
+                        <CardHeader className="border-b border-[#30363d] py-3">
+                            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                                <ShieldCheck size={18} />
+                                Security Audit
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-4 space-y-4">
+                            <Button
+                                onClick={handleReview}
+                                disabled={isReviewing}
+                                className="w-full bg-[#238636] hover:bg-[#2ea043] text-white transition-colors"
+                            >
+                                {isReviewing ? (
+                                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Analyzing...</>
+                                ) : (
+                                    'Run AI Review'
+                                )}
+                            </Button>
+
+                            {reviewResult && (
+                                <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                                    <ReviewReport
+                                        markdown={reviewResult.markdown}
+                                        issuesCount={reviewResult.issues.length}
+                                    />
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+
                 </div>
             </div>
         </div>

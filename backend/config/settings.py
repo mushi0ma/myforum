@@ -151,6 +151,21 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # CELERY & REDIS
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://redis:6379/0')
 CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://redis:6379/0')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+
+# CELERY BEAT - Периодические задачи
+CELERY_BEAT_SCHEDULE = {
+    'update-trending-scores-every-15-minutes': {
+        'task': 'forum.tasks.update_trending_scores',
+        'schedule': 900.0,  # 15 минут в секундах
+        'options': {
+            'expires': 600,  # Задача истекает через 10 минут если не выполнена
+        }
+    },
+}
 
 # DRF (API)
 REST_FRAMEWORK = {

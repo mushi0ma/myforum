@@ -15,9 +15,10 @@ class ForumPostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ForumPost
-        fields = ['id', 'author_username', 'title', 'description', 'code_snippet', 
-                  'language', 'views', 'is_solved', 'created_at', 'comments_count', 'likes_count']
-        read_only_fields = ['views', 'created_at']
+        fields = ['id', 'author_username', 'title', 'description', 'code_snippet',
+                  'language', 'views', 'forks_count', 'is_solved', 'created_at',
+                  'trending_score', 'comments_count', 'likes_count']
+        read_only_fields = ['views', 'created_at', 'trending_score']
 
     def get_likes_count(self, obj):
         return obj.votes.filter(vote_type='like').count()

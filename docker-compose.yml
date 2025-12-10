@@ -65,7 +65,27 @@ services:
     depends_on:
       - redis
 
-  # 5. REDIS
+  # 5. CELERY BEAT (Периодические задачи)
+  celery-beat:
+    build: ./backend
+    command: celery -A config beat -l info
+    volumes:
+      - ./backend:/app
+      - /mnt/git-data:/git-data
+    env_file:
+      - ./backend/.env
+    environment:
+      - DB_HOST=34.41.176.77
+      - DB_PORT=5432
+      - DB_NAME=git_forum
+      - DB_USER=mushi
+      - DB_PASS=Mushi_zynq1
+      - CELERY_BROKER_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+      - web
+
+  # 6. REDIS
   redis:
     image: redis:alpine
 

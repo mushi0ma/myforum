@@ -12,17 +12,21 @@ class ForumPost(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='forum_posts')
     title = models.CharField(max_length=200)
     description = models.TextField(help_text="Описание вопроса или темы")
-    
+
     # Сниппет кода в посте (партнер предлагал это, оставим, полезно для IT форума)
     code_snippet = models.TextField(blank=True, null=True, help_text="Кусок кода для обсуждения")
     language = models.CharField(max_length=50, default='text', help_text="Язык программирования")
-    
+
     views = models.IntegerField(default=0)
+    forks_count = models.IntegerField(default=0, help_text="Количество форков поста")
     is_solved = models.BooleanField(default=False) # Галочка "Ответ найден"
-    
+
+    # Trending score для алгоритма трендов
+    trending_score = models.FloatField(default=0.0, db_index=True, help_text="Engagement velocity score")
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     tags = TaggableManager()
 
     class Meta:
@@ -32,6 +36,38 @@ class ForumPost(models.Model):
 
     def __str__(self):
         return self.title
+
+    def calculate_trending_score(self):
+        """
+        Вычисляет trending score по формуле:
+        score = (likes + comments*2 + forks*3) / hours^1.5
+
+        Алгоритм основан на engagement velocity - как быстро пост набирает активность.
+        """
+        # Подсчет метрик
+        likes_count = self.votes.filter(vote_type='like').count()
+        comments_count = self.comments.count()
+        forks = self.forks_count
+
+        # Вычисляем количество часов с момента создания
+        time_diff = timezone.now() - self.created_at
+        hours = time_diff.total_seconds() / 3600
+
+        # Избегаем деления на ноль/очень маленькое число (минимум 0.1 часа = 6 минут)
+        hours = max(hours, 0.1)
+
+        # Формула trending score
+        engagement = likes_count + (comments_count * 2) + (forks * 3)
+        score = engagement / (hours ** 1.5)
+
+        return round(score, 2)
+
+    def save(self, *args, **kwargs):
+        """
+        Сохранение поста.
+        Trending score пересчитывается периодически через Celery Beat (каждые 15 минут).
+        """
+        super().save(*args, **kwargs)
 
 class ForumComment(models.Model):
     """Комментарии к постам форума"""

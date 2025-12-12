@@ -1,4 +1,3 @@
-import React from "react";
 import { Link } from "react-router-dom";
 import { Heart, MessageSquare, Share2, Bookmark, MoreHorizontal, GitFork } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -15,7 +14,7 @@ export interface PostCardProps {
     avatar: string;
   };
   timestamp: string;
-  code: string; // Текст кода для подсветки
+  code: string; // Текст кода
   likes: number;
   comments: number;
   forks: number;
@@ -58,6 +57,7 @@ export function PostCard({
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
+            /* Добавить меню действий */
           }}
         >
           <MoreHorizontal className="h-4 w-4" />
@@ -79,11 +79,19 @@ export function PostCard({
         </Badge>
       </div>
 
-      {/* Code Block (Preview) */}
-      <div className="overflow-x-auto code-scrollbar bg-card">
-        <pre className="line-clamp-6 font-mono text-sm bg-muted p-4 m-0 rounded-none text-muted-foreground whitespace-pre-wrap break-words">
-          {code}
+      {/* Code Block Preview (Lightweight version) */}
+      <div className="overflow-x-auto code-scrollbar bg-[#1e1e1e] p-4 text-sm">
+        <pre className="font-mono text-gray-300">
+          <code>
+            {/* Обрезаем код для превью, чтобы не перегружать DOM */}
+            {code.slice(0, 300)}
+            {code.length > 300 && <span className="text-gray-500 opacity-50">...</span>}
+          </code>
         </pre>
+        {/* Градиент внизу, намекающий, что есть еще код */}
+        {code.length > 300 && (
+          <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-[#1e1e1e] to-transparent pointer-events-none" />
+        )}
       </div>
 
       {/* Tags */}
@@ -105,6 +113,7 @@ export function PostCard({
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              /* Добавить лайк */
             }}
           >
             <Heart className="h-4 w-4" />
@@ -117,6 +126,7 @@ export function PostCard({
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              /* Открыть комменты */
             }}
           >
             <MessageSquare className="h-4 w-4" />
@@ -129,6 +139,7 @@ export function PostCard({
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              /* Форкнуть */
             }}
           >
             <GitFork className="h-4 w-4" />
@@ -143,6 +154,7 @@ export function PostCard({
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              /* Сохранить */
             }}
           >
             <Bookmark className="h-4 w-4" />
@@ -154,6 +166,7 @@ export function PostCard({
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              /* Поделиться */
             }}
           >
             <Share2 className="h-4 w-4" />

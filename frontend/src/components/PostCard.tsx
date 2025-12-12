@@ -37,7 +37,7 @@ export function PostCard({
     <article className="rounded-lg border border-border bg-card text-card-foreground overflow-hidden transition-colors hover:border-primary/50">
 
       {/* Post Header - Author Info */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+      <div className="relative z-10 flex items-center justify-between px-4 py-3 border-b border-border">
         <div className="flex items-center gap-3">
           <Avatar className="h-9 w-9">
             <AvatarImage src={author.avatar} />
@@ -80,7 +80,7 @@ export function PostCard({
       </div>
 
       {/* Code Block Preview (Lightweight version) */}
-      <div className="overflow-x-auto code-scrollbar bg-[#1e1e1e] p-4 text-sm">
+      <div className="relative overflow-x-auto code-scrollbar bg-[#1e1e1e] p-4 text-sm">
         <pre className="font-mono text-gray-300">
           <code>
             {/* Обрезаем код для превью, чтобы не перегружать DOM */}
@@ -104,7 +104,7 @@ export function PostCard({
       </div>
 
       {/* Actions */}
-      <div className="flex items-center justify-between px-4 py-3 border-t border-border">
+      <div className="relative z-10 flex items-center justify-between px-4 py-3 border-t border-border">
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"

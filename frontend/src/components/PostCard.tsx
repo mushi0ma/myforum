@@ -1,8 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Heart, MessageSquare, Share2, Bookmark, MoreHorizontal, GitFork } from "lucide-react";
-import { PrismAsyncLight as SyntaxHighlighter } from "react-syntax-highlighter";
-import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -37,7 +35,7 @@ export function PostCard({
   tags,
 }: PostCardProps) {
   const content = (
-    <article className="rounded-lg border border-border bg-card overflow-hidden transition-colors hover:border-primary/50">
+    <article className="rounded-lg border border-border bg-card text-card-foreground overflow-hidden transition-colors hover:border-primary/50">
 
       {/* Post Header - Author Info */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border">
@@ -53,7 +51,15 @@ export function PostCard({
             </span>
           </div>
         </div>
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.preventDefault()}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+        >
           <MoreHorizontal className="h-4 w-4" />
         </Button>
       </div>
@@ -73,23 +79,11 @@ export function PostCard({
         </Badge>
       </div>
 
-      {/* Code Block with Syntax Highlighting */}
-      <div className="overflow-x-auto code-scrollbar">
-        <SyntaxHighlighter
-          language={language.toLowerCase()}
-          style={vscDarkPlus}
-          customStyle={{
-            margin: 0,
-            padding: "1rem",
-            fontSize: "0.875rem",
-            lineHeight: "1.625",
-            background: "#1e1e1e",
-          }}
-          showLineNumbers={false}
-          wrapLines={false}
-        >
+      {/* Code Block (Preview) */}
+      <div className="overflow-x-auto code-scrollbar bg-card">
+        <pre className="line-clamp-6 font-mono text-sm bg-muted p-4 m-0 rounded-none text-muted-foreground whitespace-pre-wrap break-words">
           {code}
-        </SyntaxHighlighter>
+        </pre>
       </div>
 
       {/* Tags */}
@@ -108,7 +102,10 @@ export function PostCard({
             variant="ghost"
             size="sm"
             className="gap-1.5 text-muted-foreground hover:text-red-400"
-            onClick={(e) => e.preventDefault()}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
           >
             <Heart className="h-4 w-4" />
             <span className="text-xs">{likes}</span>
@@ -117,7 +114,10 @@ export function PostCard({
             variant="ghost"
             size="sm"
             className="gap-1.5 text-muted-foreground hover:text-primary"
-            onClick={(e) => e.preventDefault()}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
           >
             <MessageSquare className="h-4 w-4" />
             <span className="text-xs">{comments}</span>
@@ -126,7 +126,10 @@ export function PostCard({
             variant="ghost"
             size="sm"
             className="gap-1.5 text-muted-foreground hover:text-green-400"
-            onClick={(e) => e.preventDefault()}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
           >
             <GitFork className="h-4 w-4" />
             <span className="text-xs">{forks}</span>
@@ -137,7 +140,10 @@ export function PostCard({
             variant="ghost"
             size="icon"
             className="h-8 w-8 text-muted-foreground hover:text-primary"
-            onClick={(e) => e.preventDefault()}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
           >
             <Bookmark className="h-4 w-4" />
           </Button>
@@ -145,7 +151,10 @@ export function PostCard({
             variant="ghost"
             size="icon"
             className="h-8 w-8 text-muted-foreground hover:text-primary"
-            onClick={(e) => e.preventDefault()}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
           >
             <Share2 className="h-4 w-4" />
           </Button>
@@ -156,7 +165,7 @@ export function PostCard({
 
   if (id) {
     return (
-      <Link to={`/post/${id}`} className="block">
+      <Link to={`/post/${id}`} className="block w-full group text-foreground no-underline">
         {content}
       </Link>
     );

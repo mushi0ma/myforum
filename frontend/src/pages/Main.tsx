@@ -1,4 +1,6 @@
+import { useState, useEffect } from "react";
 import { PostCard, PostCardProps } from "@/components/PostCard";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const MOCK_POSTS: PostCardProps[] = [
   {
@@ -52,17 +54,40 @@ const MOCK_POSTS: PostCardProps[] = [
 ];
 
 export default function Main() {
+  const [isLoading, setIsLoading] = useState(false);
+
   return (
-    <div className="space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold font-mono tracking-tight">Your Feed</h1>
         {/* Можно добавить фильтры здесь */}
       </div>
       
       <div className="space-y-4">
-        {MOCK_POSTS.map((post) => (
-          <PostCard key={post.id} {...post} />
-        ))}
+        {isLoading ? (
+          Array.from({ length: 2 }).map((_, i) => (
+            <div key={i} className="rounded-lg border border-border bg-card p-4 space-y-4">
+              <div className="flex items-center space-x-4">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-[200px]" />
+                  <Skeleton className="h-3 w-[150px]" />
+                </div>
+              </div>
+              <Skeleton className="h-[20px] w-full" />
+              <Skeleton className="h-[150px] w-full rounded-md" />
+              <div className="flex gap-2 pt-2">
+                <Skeleton className="h-8 w-16" />
+                <Skeleton className="h-8 w-16" />
+                <Skeleton className="h-8 w-16" />
+              </div>
+            </div>
+          ))
+        ) : (
+          MOCK_POSTS.map((post) => (
+            <PostCard key={post.id} {...post} />
+          ))
+        )}
       </div>
     </div>
   );

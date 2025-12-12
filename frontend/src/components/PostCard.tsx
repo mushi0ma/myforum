@@ -34,7 +34,7 @@ export function PostCard({
   tags,
 }: PostCardProps) {
   const content = (
-    <article className="rounded-lg border border-border bg-card overflow-hidden transition-colors hover:border-primary/50">
+    <article className="rounded-lg border border-border bg-card text-card-foreground overflow-hidden transition-colors hover:border-primary/50">
 
       {/* Post Header - Author Info */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border">
@@ -50,7 +50,16 @@ export function PostCard({
             </span>
           </div>
         </div>
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.preventDefault(); /* Добавить меню действий */ }}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            /* Добавить меню действий */
+          }}
+        >
           <MoreHorizontal className="h-4 w-4" />
         </Button>
       </div>
@@ -101,7 +110,11 @@ export function PostCard({
             variant="ghost"
             size="sm"
             className="gap-1.5 text-muted-foreground hover:text-red-400"
-            onClick={(e) => { e.preventDefault(); /* Добавить лайк */ }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              /* Добавить лайк */
+            }}
           >
             <Heart className="h-4 w-4" />
             <span className="text-xs">{likes}</span>
@@ -110,7 +123,11 @@ export function PostCard({
             variant="ghost"
             size="sm"
             className="gap-1.5 text-muted-foreground hover:text-primary"
-            onClick={(e) => { e.preventDefault(); /* Открыть комменты */ }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              /* Открыть комменты */
+            }}
           >
             <MessageSquare className="h-4 w-4" />
             <span className="text-xs">{comments}</span>
@@ -119,7 +136,11 @@ export function PostCard({
             variant="ghost"
             size="sm"
             className="gap-1.5 text-muted-foreground hover:text-green-400"
-            onClick={(e) => { e.preventDefault(); /* Форкнуть */ }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              /* Форкнуть */
+            }}
           >
             <GitFork className="h-4 w-4" />
             <span className="text-xs">{forks}</span>
@@ -130,7 +151,11 @@ export function PostCard({
             variant="ghost"
             size="icon"
             className="h-8 w-8 text-muted-foreground hover:text-primary"
-            onClick={(e) => { e.preventDefault(); /* Сохранить */ }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              /* Сохранить */
+            }}
           >
             <Bookmark className="h-4 w-4" />
           </Button>
@@ -138,7 +163,11 @@ export function PostCard({
             variant="ghost"
             size="icon"
             className="h-8 w-8 text-muted-foreground hover:text-primary"
-            onClick={(e) => { e.preventDefault(); /* Поделиться */ }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              /* Поделиться */
+            }}
           >
             <Share2 className="h-4 w-4" />
           </Button>
@@ -149,7 +178,7 @@ export function PostCard({
 
   if (id) {
     return (
-      <Link to={`/post/${id}`} className="block">
+      <Link to={`/post/${id}`} className="block w-full group text-foreground no-underline">
         {content}
       </Link>
     );

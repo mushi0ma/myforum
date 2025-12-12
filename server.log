@@ -1,0 +1,12 @@
+
+> frontend@0.0.0 dev
+> vite --host
+
+
+  VITE v5.4.21  ready in 750 ms
+
+  ➜  Local:   http://localhost:3000/
+  ➜  Network: http://192.168.0.2:3000/
+6:26:35 AM [vite] hmr update /src/components/PostCard.tsx, /src/index.css
+6:29:19 AM [vite] hmr update /src/pages/Main.tsx, /src/index.css
+6:29:31 AM [vite] hmr update /src/components/PostCard.tsx, /src/index.css

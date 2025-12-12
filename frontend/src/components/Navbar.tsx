@@ -60,7 +60,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
           <Link to="/new">
             <Button size="sm" className="gap-1">
               <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">New Post</span>
+              <span className="hidden md:inline">New Post</span>
             </Button>
           </Link>
 

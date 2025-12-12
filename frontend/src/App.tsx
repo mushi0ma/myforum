@@ -22,12 +22,12 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/social-complete" element={<SocialComplete />} />
+        <Route path="/profile" element={<Profile />} />
 
         {/* Приватные страницы (Внутри Layout) */}
         <Route element={<MainLayout />}>
           <Route path="/main" element={<Main />} />
           <Route path="/feed" element={<Main />} />
-          <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/trending" element={<Trending />} />
           <Route path="/explore" element={<Explore />} />

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
     Book,
     GitFork,
@@ -164,12 +165,14 @@ export default function Profile() {
                     </div>
 
                     {/* Action Button */}
-                    <Button
-                        className="w-full bg-[#1a1d1f] border border-[#333637] text-[#ffffff] hover:bg-[#333637] hover:border-[#58a6ff] transition-all font-medium font-sans gap-2"
-                    >
-                        <Edit2 size={16} />
-                        Редактировать профиль
-                    </Button>
+                    <Link to="/settings">
+                        <Button
+                            className="w-full bg-[#1a1d1f] border border-[#333637] text-[#ffffff] hover:bg-[#333637] hover:border-[#58a6ff] transition-all font-medium font-sans gap-2"
+                        >
+                            <Edit2 size={16} />
+                            Редактировать профиль
+                        </Button>
+                    </Link>
 
                     {/* Bio */}
                     <p className="text-[#ffffff] text-[15px] leading-relaxed font-sans">

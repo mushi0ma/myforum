@@ -24,16 +24,38 @@ import {
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-// Меню навигации (логика партнера, адаптированная под наши роуты)
-const items = [
+// ==========================================
+// FUTURE: Split navigation into Forum & Git tabs
+// ==========================================
+// Forum items: Home, Explore, Trending, Bookmarks (forum posts)
+// Git items: Repositories, Commits, Pull Requests, Issues
+// Use <Tabs> component to switch between Forum/Git modes
+// ==========================================
+
+// Menu navigation (adapted from donor project)
+const forumItems = [
     { title: "Home", url: "/main", icon: Home },
     { title: "Explore", url: "/explore", icon: Hash },
     { title: "Trending", url: "/trending", icon: Flame },
     { title: "Bookmarks", url: "/bookmarks", icon: Bookmark },
-    { title: "AI Tools", url: "/test-ai", icon: Code2 }, // Наш новый инструмент
+];
+
+// FUTURE: Git items (uncomment when ready)
+// const gitItems = [
+//   { title: "Repositories", url: "/repos", icon: GitBranch },
+//   { title: "Commits", url: "/commits", icon: GitCommit },
+//   { title: "Pull Requests", url: "/pulls", icon: GitPullRequest },
+//   { title: "Issues", url: "/issues", icon: AlertCircle },
+// ];
+
+const utilityItems = [
+    { title: "AI Tools", url: "/test-ai", icon: Code2 },
     { title: "Profile", url: "/profile", icon: User },
     { title: "Settings", url: "/settings", icon: Settings },
 ];
+
+// Combine all items for now (FUTURE: separate by tabs)
+const items = [...forumItems, ...utilityItems];
 
 export function AppSidebar() {
     const location = useLocation(); // Хук React Router для подсветки активной ссылки
@@ -49,7 +71,7 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <SidebarGroup>
-                    <SidebarGroupLabel>Application</SidebarGroupLabel>
+                    <SidebarGroupLabel>Forum Navigation</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {items.map((item) => (

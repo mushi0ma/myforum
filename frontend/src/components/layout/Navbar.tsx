@@ -1,54 +1,113 @@
-import { Link } from 'react-router-dom';
-import { Search, Bell, Plus, User } from 'lucide-react';
-import logo from '@/assets/GitForum logo.svg';
-import { Button } from '@/components/ui/button';
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Link } from "react-router-dom";
+import { Search, Bell, Plus, Menu, User, Settings, LogOut, Bookmark } from "lucide-react";
+import logo from "@/assets/GitForum logo.svg";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-export function Navbar() {
+interface NavbarProps {
+  onMenuClick?: () => void;
+}
+
+export function Navbar({ onMenuClick }: NavbarProps) {
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
-      <div className="w-full px-4 h-16 flex items-center justify-between">
-        
-        {/* Левая часть: Триггер сайдбара + Логотип + Поиск */}
-        <div className="flex items-center gap-4 flex-1">
-          {/* Кнопка открытия/закрытия сайдбара */}
-          <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
-
-          {/* Логотип */}
-          <Link to="/main" className="flex items-center gap-2 flex-shrink-0 mr-4">
-            <img src={logo} alt="Logo" className="h-8 w-8" />
-            <span className="font-bold hidden md:block font-mono tracking-tight text-lg">GitForum</span>
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-card/80 backdrop-blur-md">
+      <div className="flex h-14 items-center justify-between px-4 md:px-6">
+        {/* Mobile Menu Button + Logo */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden"
+            onClick={onMenuClick}
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+          <Link to="/main" className="flex items-center gap-2">
+            <img src={logo} alt="GitForum" className="h-8 w-8" />
+            <span className="text-lg font-semibold tracking-tight font-mono">GitForum</span>
           </Link>
+        </div>
 
-          {/* Поиск */}
-          <div className="relative w-full max-w-md hidden md:block">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-            <input
-              type="text"
-              placeholder="Search ( / )"
-              className="w-full bg-muted/50 border border-transparent rounded-md py-1.5 pl-9 pr-4 text-sm text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-muted-foreground hover:bg-muted"
+        {/* Search Bar */}
+        <div className="hidden flex-1 max-w-md mx-8 md:block">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search code, users, tags..."
+              className="w-full pl-9 bg-secondary border-border focus:ring-primary"
             />
           </div>
         </div>
 
-        {/* Правая часть: Действия */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          <button className="p-2 text-muted-foreground hover:text-primary transition-colors">
-            <Bell size={20} />
-          </button>
-
+        {/* Right Actions */}
+        <div className="flex items-center gap-2">
+          <Link to="/notifications">
+            <Button variant="ghost" size="icon" className="hidden md:flex">
+              <Bell className="h-5 w-5" />
+            </Button>
+          </Link>
           <Link to="/new">
-            <Button size="sm" className="hidden md:flex gap-2 bg-green-600 hover:bg-green-700 text-white font-medium shadow-sm">
-              <Plus size={16} />
-              <span>New Post</span>
+            <Button size="sm" className="gap-1">
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">New Post</span>
             </Button>
           </Link>
 
-          <Link to="/profile">
-            <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center overflow-hidden cursor-pointer hover:border-primary transition-colors">
-              <User size={18} className="text-muted-foreground" />
-            </div>
-          </Link>
+          {/* User Menu Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src="/developer-avatar.png" alt="User" />
+                  <AvatarFallback>U</AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end" forceMount>
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none">My User</p>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    user@example.com
+                  </p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link to="/profile" className="cursor-pointer">
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/bookmarks" className="cursor-pointer">
+                  <Bookmark className="mr-2 h-4 w-4" />
+                  <span>Bookmarks</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/settings" className="cursor-pointer">
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Settings</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-red-400 focus:text-red-300 focus:bg-red-400/10">
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Sign Out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>

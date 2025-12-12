@@ -74,7 +74,7 @@ export function PostCard({
       </div>
 
       {/* Code Block with Syntax Highlighting */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto code-scrollbar">
         <SyntaxHighlighter
           language={language.toLowerCase()}
           style={vscDarkPlus}

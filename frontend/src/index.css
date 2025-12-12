@@ -74,6 +74,12 @@
     --card-foreground: var(--color-white);
     --border: var(--color-dark-2);
     --input: var(--color-dark-1);
+    --primary: var(--gh-accent-fg);
+    --primary-foreground: var(--color-white);
+    --destructive: #da3633;
+    --destructive-foreground: var(--color-white);
+    --accent: var(--gh-success-emphasis);
+    --accent-hover: var(--gh-success-fg);
     --muted-foreground: var(--color-gray);
     --ring: var(--gh-accent-fg);
     --radius: .5rem;
@@ -127,6 +133,24 @@
 
   .bg-pos-100 {
     background-position: 100% center;
+  }
+
+  /* Custom scrollbar for code blocks */
+  .code-scrollbar::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .code-scrollbar::-webkit-scrollbar-track {
+    background: var(--color-dark-1);
+  }
+
+  .code-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--color-dark-2);
+    border-radius: 4px;
+  }
+
+  .code-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--color-gray);
   }
 }
 

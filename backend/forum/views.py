@@ -1,9 +1,30 @@
-from rest_framework import viewsets, filters, permissions
+from rest_framework import viewsets, filters, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Count, Q
-from .models import ForumPost, ForumComment, PostVote
-from .serializers import ForumPostSerializer, ForumCommentSerializer
+from .models import ForumPost, ForumComment, PostVote, Notification, SavedForumPost
+from .serializers import ForumPostSerializer, ForumCommentSerializer, NotificationSerializer, SavedForumPostSerializer
+
+class NotificationViewSet(viewsets.ModelViewSet):
+    serializer_class = NotificationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Notification.objects.filter(recipient=self.request.user)
+
+    @action(detail=True, methods=['post'])
+    def read(self, request, pk=None):
+        """Пометить уведомление как прочитанное"""
+        notification = self.get_object()
+        notification.is_read = True
+        notification.save()
+        return Response({'status': 'marked as read'})
+
+    @action(detail=False, methods=['get'])
+    def unread_count(self, request):
+        """Получить количество непрочитанных уведомлений"""
+        count = self.get_queryset().filter(is_read=False).count()
+        return Response({'count': count})
 
 class ForumPostViewSet(viewsets.ModelViewSet):
     """
@@ -95,6 +116,22 @@ class ForumPostViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(forked_post)
         return Response(serializer.data)
 
+    @action(detail=True, methods=['post'])
+    def save_post(self, request, pk=None):
+        """Добавить/удалить пост из закладок (toggle)"""
+        post = self.get_object()
+        user = request.user
+
+        if not user.is_authenticated:
+            return Response({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        saved, created = SavedForumPost.objects.get_or_create(user=user, post=post)
+        if not created:
+            saved.delete()
+            return Response({'status': 'unsaved', 'is_saved': False})
+
+        return Response({'status': 'saved', 'is_saved': True})
+
 class ForumCommentViewSet(viewsets.ModelViewSet):
     queryset = ForumComment.objects.all()
     serializer_class = ForumCommentSerializer
@@ -111,3 +148,36 @@ class ForumCommentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         user = self.request.user if self.request.user.is_authenticated else None
         serializer.save(author=user)
+
+
+class SavedForumPostViewSet(viewsets.ModelViewSet):
+    """
+    API для закладок (Bookmarks).
+
+    GET /api/forum/bookmarks/ - получить список закладок пользователя
+    POST /api/forum/bookmarks/ - добавить пост в закладки (body: {post_id: 1})
+    DELETE /api/forum/bookmarks/{id}/ - удалить закладку
+    """
+    serializer_class = SavedForumPostSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        """Возвращает только закладки текущего пользователя"""
+        return SavedForumPost.objects.filter(user=self.request.user).select_related('post', 'post__author')
+
+    def perform_create(self, serializer):
+        """Автоматически присваиваем текущего пользователя"""
+        serializer.save(user=self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        """Создание закладки с проверкой на дубликат"""
+        post_id = request.data.get('post_id')
+        if not post_id:
+            return Response({'error': 'post_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Проверяем, не сохранен ли уже
+        existing = SavedForumPost.objects.filter(user=request.user, post_id=post_id).first()
+        if existing:
+            return Response({'error': 'Post already saved', 'id': existing.id}, status=status.HTTP_409_CONFLICT)
+
+        return super().create(request, *args, **kwargs)

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -24,9 +25,10 @@ const codeFonts = [
 ];
 
 export function SettingsAppearance() {
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const [saving, setSaving] = useState(false);
   const [appearance, setAppearance] = useState({
-    theme: "dark",
     codeTheme: "github-dark",
     codeFont: "jetbrains-mono",
     fontSize: 14,
@@ -34,13 +36,13 @@ export function SettingsAppearance() {
     wordWrap: false,
   });
 
+  // Prevent hydration mismatch
   useEffect(() => {
-    const savedTheme = localStorage.getItem("gitforum-theme");
-    const savedAppearance = localStorage.getItem("gitforum-appearance");
+    setMounted(true);
+  }, []);
 
-    if (savedTheme) {
-      setAppearance((prev) => ({ ...prev, theme: savedTheme }));
-    }
+  useEffect(() => {
+    const savedAppearance = localStorage.getItem("gitforum-appearance");
     if (savedAppearance) {
       try {
         const parsed = JSON.parse(savedAppearance);
@@ -51,23 +53,12 @@ export function SettingsAppearance() {
     }
   }, []);
 
-  const applyTheme = (theme: string) => {
-    const root = document.documentElement;
-
-    if (theme === "system") {
-      const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      root.classList.toggle("dark", systemDark);
-    } else {
-      root.classList.toggle("dark", theme === "dark");
-    }
-
-    localStorage.setItem("gitforum-theme", theme);
+  const handleThemeChange = (newTheme: string) => {
+    setTheme(newTheme);
   };
 
-  const handleThemeChange = (theme: string) => {
-    setAppearance({ ...appearance, theme });
-    applyTheme(theme);
-  };
+  // Get current theme value (handles SSR)
+  const currentTheme = mounted ? theme : "system";
 
   const handleSave = async () => {
     setSaving(true);
@@ -96,7 +87,7 @@ export function SettingsAppearance() {
           <h3 className="font-semibold mb-1">Theme</h3>
           <p className="text-sm text-muted-foreground">Select your preferred color scheme</p>
         </div>
-        <RadioGroup value={appearance.theme} onValueChange={handleThemeChange} className="grid grid-cols-3 gap-4">
+        <RadioGroup value={currentTheme} onValueChange={handleThemeChange} className="grid grid-cols-3 gap-4">
           {[
             { value: "light", label: "Light", icon: Sun },
             { value: "dark", label: "Dark", icon: Moon },
@@ -106,7 +97,7 @@ export function SettingsAppearance() {
               key={option.value}
               htmlFor={option.value}
               className={`flex flex-col items-center gap-2 p-4 rounded-lg border-2 cursor-pointer transition-colors ${
-                appearance.theme === option.value
+                currentTheme === option.value
                   ? "border-primary bg-primary/10"
                   : "border-border bg-card hover:border-muted-foreground/50"
               }`}

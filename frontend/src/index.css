@@ -53,46 +53,104 @@
 @layer base {
   :root {
     --font-size: 16px;
+    --radius: 0.5rem;
 
-    /* New Dark Mode Color Scheme */
-    --color-black: #0d1117;
-    --color-dark-1: #161b22;
-    --color-dark-2: #30363d;
-    --color-gray: #656869;
-    --color-white: #ffffff;
+    /* Light Theme (Default) */
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
 
-    /* GitHub Accent Colors (keeping these for accents) */
-    --gh-accent-emphasis: #1f6feb;
-    --gh-accent-fg: #58a6ff;
-    --gh-accent-subtle: rgba(88, 166, 255, 0.15);
-    --gh-success-emphasis: #238636;
-    --gh-success-fg: #3fb950;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
 
-    --background: var(--color-black);
-    --foreground: var(--color-white);
-    --card: var(--color-dark-1);
-    --card-foreground: var(--color-white);
-    --border: var(--color-dark-2);
-    --input: var(--color-dark-1);
-    --primary: var(--gh-accent-fg);
-    --primary-foreground: var(--color-white);
-    --destructive: #da3633;
-    --destructive-foreground: var(--color-white);
-    --accent: var(--gh-success-emphasis);
-    --accent-hover: var(--gh-success-fg);
-    --muted-foreground: var(--color-gray);
-    --ring: var(--gh-accent-fg);
-    --radius: .5rem;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 212 92% 45%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 47% 11%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 212 92% 45%;
+
+    /* Sidebar specific - Light */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5% 34%;
+    --sidebar-primary: 212 92% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 5% 96%;
+    --sidebar-accent-foreground: 240 6% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 212 92% 45%;
+
+    /* Legacy color references */
+    --color-black: #000000;
+    --color-dark-1: hsl(210 6% 11%);
+    --color-dark-2: hsl(210 6% 20%);
+    --color-gray: hsl(210 10% 60%);
+    --color-white: hsl(210 17% 98%);
+  }
+
+  /* Dark Theme */
+  .dark {
+    --background: 0 0% 0%;
+    --foreground: 210 17% 98%;
+
+    --card: 210 6% 11%;
+    --card-foreground: 210 17% 98%;
+
+    --popover: 210 6% 11%;
+    --popover-foreground: 210 17% 98%;
+
+    --primary: 212 92% 67%;
+    --primary-foreground: 0 0% 0%;
+
+    --secondary: 210 6% 15%;
+    --secondary-foreground: 210 17% 98%;
+
+    --muted: 210 6% 15%;
+    --muted-foreground: 210 10% 60%;
+
+    --accent: 210 6% 18%;
+    --accent-foreground: 210 17% 98%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 210 6% 20%;
+    --input: 210 6% 20%;
+    --ring: 212 92% 67%;
+
+    /* Sidebar specific - Dark */
+    --sidebar-background: 240 6% 6%;
+    --sidebar-foreground: 210 10% 70%;
+    --sidebar-primary: 212 92% 67%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 6% 12%;
+    --sidebar-accent-foreground: 210 17% 98%;
+    --sidebar-border: 210 6% 17%;
+    --sidebar-ring: 212 92% 67%;
   }
 
   * {
-    border-color: var(--border);
-    outline-color: var(--ring);
+    border-color: hsl(var(--border));
+    outline-color: hsl(var(--ring));
   }
 
   body {
-    background: var(--background);
-    color: var(--foreground);
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
     font-size: var(--font-size);
     font-family: 'Reddit Sans Chocolate', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     -webkit-font-smoothing: antialiased;

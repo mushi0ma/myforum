@@ -1,40 +1,29 @@
-import { Search, Bell, Plus, Menu, User, Settings, LogOut, Bookmark } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Search, Bell, Plus, User, Settings, LogOut, Bookmark } from "lucide-react";
+import logo from "@/assets/GitForum logo.svg";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  Dropdown
-  
-  MenuItem,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Link } from "react-router-dom";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
-interface NavbarProps {
-  onMenuClick?: () => void;
-}
-
-export function Navbar({ onMenuClick }: NavbarProps) {
+export function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-card/80 backdrop-blur-md">
       <div className="flex h-14 items-center justify-between px-4 md:px-6">
         {/* Mobile Menu Button + Logo */}
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden"
-            onClick={onMenuClick}
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
-          <Link to="/" className="flex items-center gap-2">
-            <img src="/gitforum-logo.svg" alt="GitForum" width={32} height={32} />
-            <span className="text-lg font-semibold tracking-tight">GitForum</span>
+          <SidebarTrigger className="lg:hidden" />
+          <Link to="/main" className="flex items-center gap-2">
+            <img src={logo} alt="GitForum" className="h-8 w-8" />
+            <span className="text-lg font-semibold tracking-tight font-mono">GitForum</span>
           </Link>
         </div>
 

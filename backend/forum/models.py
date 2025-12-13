@@ -108,3 +108,21 @@ class SavedForumPost(models.Model):
 
     class Meta:
         unique_together = ('user', 'post')
+
+class Notification(models.Model):
+    """Уведомления для пользователей"""
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    actor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='actions')
+    verb = models.CharField(max_length=50)  # "liked", "forked", "replied"
+    target_link = models.CharField(max_length=255, blank=True, null=True)
+    is_read = models.BooleanField(default=False)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['recipient', 'is_read']),
+        ]
+
+    def __str__(self):
+        return f"Notification for {self.recipient}: {self.actor} {self.verb}"

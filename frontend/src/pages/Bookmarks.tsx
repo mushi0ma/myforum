@@ -1,93 +1,110 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BookmarkCard } from "@/components/BookmarkCard";
 import { BookmarksEmpty } from "@/components/BookmarksEmpty";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, SlidersHorizontal, Grid3X3, List, Bookmark } from "lucide-react";
+import { Search, SlidersHorizontal, Grid3X3, List, Bookmark, Loader2 } from "lucide-react";
+import { forumApi, SavedPost } from "@/services/api";
+import { toast } from "sonner";
 
-// Mock data - TODO: Replace with API call
-const initialBookmarks = [
-  {
-    id: "1",
-    title: "react-query-hooks",
-    description:
-      "A collection of custom React Query hooks for common data fetching patterns. Includes pagination, infinite scroll, and optimistic updates.",
-    language: "TypeScript",
-    languageColor: "bg-blue-500",
-    author: { name: "Sarah Chen", avatar: "/avatars/sarah.png" },
-    stars: 1234,
-    forks: 156,
-    views: 5420,
-    tags: ["react", "hooks", "query", "typescript"],
-    savedAt: "2 days ago",
-  },
-  {
-    id: "2",
-    title: "go-microservice",
-    description: "Production-ready Go microservice template with gRPC, REST, and message queue support.",
-    language: "Go",
-    languageColor: "bg-cyan-500",
-    author: { name: "Jordan Kim", avatar: "/avatars/jordan.png" },
-    stars: 2341,
-    forks: 432,
-    views: 12500,
-    tags: ["go", "microservice", "grpc"],
-    savedAt: "5 days ago",
-  },
-  {
-    id: "3",
-    title: "py-async-utils",
-    description: "Async utility functions for Python including rate limiters, retry decorators, and connection pools.",
-    language: "Python",
-    languageColor: "bg-yellow-500",
-    author: { name: "Alex Rivera", avatar: "/avatars/alex.png" },
-    stars: 892,
-    forks: 98,
-    views: 3210,
-    tags: ["python", "async", "utilities"],
-    savedAt: "1 week ago",
-  },
-  {
-    id: "4",
-    title: "rust-cli-toolkit",
-    description: "Build beautiful CLI apps in Rust with progress bars, spinners, and colorful output.",
-    language: "Rust",
-    languageColor: "bg-orange-500",
-    author: { name: "Maria Lopez", avatar: "/avatars/maria.png" },
-    stars: 567,
-    forks: 45,
-    views: 2100,
-    tags: ["rust", "cli", "terminal"],
-    savedAt: "2 weeks ago",
-  },
-  {
-    id: "5",
-    title: "node-auth-kit",
-    description: "Complete authentication solution for Node.js with JWT, OAuth2, and session support.",
-    language: "JavaScript",
-    languageColor: "bg-yellow-400",
-    author: { name: "Mike Johnson", avatar: "/avatars/mike.png" },
-    stars: 1890,
-    forks: 234,
-    views: 8900,
-    tags: ["node", "auth", "jwt", "oauth"],
-    savedAt: "3 weeks ago",
-  },
-];
+// Language color mapping
+const languageColors: Record<string, string> = {
+  TypeScript: "bg-blue-500",
+  JavaScript: "bg-yellow-400",
+  Python: "bg-yellow-500",
+  Go: "bg-cyan-500",
+  Rust: "bg-orange-500",
+  Java: "bg-red-500",
+  "C++": "bg-pink-500",
+  Ruby: "bg-red-400",
+  PHP: "bg-purple-500",
+  Swift: "bg-orange-400",
+  Kotlin: "bg-purple-400",
+  default: "bg-gray-500",
+};
+
+// Helper to get relative time
+function getRelativeTime(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+  const diffWeeks = Math.floor(diffDays / 7);
+
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins} minute${diffMins !== 1 ? "s" : ""} ago`;
+  if (diffHours < 24) return `${diffHours} hour${diffHours !== 1 ? "s" : ""} ago`;
+  if (diffDays < 7) return `${diffDays} day${diffDays !== 1 ? "s" : ""} ago`;
+  if (diffWeeks < 4) return `${diffWeeks} week${diffWeeks !== 1 ? "s" : ""} ago`;
+  return date.toLocaleDateString();
+}
 
 export default function Bookmarks() {
-  const [bookmarks, setBookmarks] = useState(initialBookmarks);
+  const [bookmarks, setBookmarks] = useState<SavedPost[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("recent");
   const [filterLanguage, setFilterLanguage] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
-  const handleRemoveBookmark = (id: string) => {
-    setBookmarks((prev) => prev.filter((b) => b.id !== id));
+  // Fetch bookmarks on mount
+  useEffect(() => {
+    fetchBookmarks();
+  }, []);
+
+  const fetchBookmarks = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const data = await forumApi.getBookmarks();
+      setBookmarks(data);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to load bookmarks";
+      setError(message);
+      // Don't show error toast for auth errors - just show empty state
+      if (!message.includes("Unauthorized")) {
+        toast.error(message);
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const filteredBookmarks = bookmarks
+  const handleRemoveBookmark = async (bookmarkId: number) => {
+    try {
+      await forumApi.unsavePost(bookmarkId);
+      setBookmarks((prev) => prev.filter((b) => b.id !== bookmarkId));
+      toast.success("Bookmark removed");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to remove bookmark";
+      toast.error(message);
+    }
+  };
+
+  // Transform API data to display format
+  const displayBookmarks = bookmarks.map((saved) => ({
+    id: saved.id,
+    postId: saved.post.id,
+    title: saved.post.title,
+    description: saved.post.description,
+    language: saved.post.language,
+    languageColor: languageColors[saved.post.language] || languageColors.default,
+    author: {
+      name: saved.post.author_username || "Anonymous",
+      avatar: "",
+    },
+    stars: saved.post.likes_count,
+    forks: saved.post.forks_count,
+    views: saved.post.views,
+    tags: [], // Tags would come from taggit - could be added to serializer
+    savedAt: getRelativeTime(saved.saved_at),
+  }));
+
+  const filteredBookmarks = displayBookmarks
     .filter((b) => {
       const matchesSearch =
         b.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -99,10 +116,34 @@ export default function Bookmarks() {
     .sort((a, b) => {
       if (sortBy === "stars") return b.stars - a.stars;
       if (sortBy === "title") return a.title.localeCompare(b.title);
-      return 0; // recent - keep original order
+      return 0; // recent - keep original order (already sorted by saved_at from API)
     });
 
-  const languages = [...new Set(bookmarks.map((b) => b.language))];
+  const languages = [...new Set(displayBookmarks.map((b) => b.language))];
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="mx-auto max-w-5xl px-4 py-6">
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="ml-3 text-muted-foreground">Loading bookmarks...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state (for non-auth errors)
+  if (error && !error.includes("Unauthorized")) {
+    return (
+      <div className="mx-auto max-w-5xl px-4 py-6">
+        <div className="text-center py-20">
+          <p className="text-destructive mb-4">{error}</p>
+          <Button onClick={fetchBookmarks}>Try Again</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6">
@@ -193,7 +234,17 @@ export default function Bookmarks() {
               {filteredBookmarks.map((bookmark) => (
                 <BookmarkCard
                   key={bookmark.id}
-                  {...bookmark}
+                  id={String(bookmark.postId)}
+                  title={bookmark.title}
+                  description={bookmark.description}
+                  language={bookmark.language}
+                  languageColor={bookmark.languageColor}
+                  author={bookmark.author}
+                  stars={bookmark.stars}
+                  forks={bookmark.forks}
+                  views={bookmark.views}
+                  tags={bookmark.tags}
+                  savedAt={bookmark.savedAt}
                   onRemove={() => handleRemoveBookmark(bookmark.id)}
                 />
               ))}

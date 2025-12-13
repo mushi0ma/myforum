@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Link } from "react-router-dom";
 import { Heart, MessageSquare, Share2, Bookmark, MoreHorizontal, GitFork } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -21,7 +22,7 @@ export interface PostCardProps {
   tags: string[];
 }
 
-export function PostCard({
+export const PostCard = memo(function PostCard({
   id,
   filename,
   language,
@@ -80,7 +81,10 @@ export function PostCard({
       </div>
 
       {/* Code Block Preview (Lightweight version) */}
-      <div className="relative overflow-x-auto code-scrollbar bg-[#1e1e1e] p-4 text-sm">
+      <div 
+        className="relative overflow-x-auto code-scrollbar bg-[#1e1e1e] p-4 text-sm"
+        style={{ contentVisibility: "auto", containIntrinsicSize: "0 300px" }} // CSS Optimization
+      >
         <pre className="font-mono text-gray-300">
           <code>
             {/* Обрезаем код для превью, чтобы не перегружать DOM */}
@@ -185,4 +189,4 @@ export function PostCard({
   }
 
   return content;
-}
+});

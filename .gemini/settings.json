@@ -1,0 +1,41 @@
+{
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@latest",
+        "--api-key",
+        "ctx7sk-fbe06a77-4635-4705-b125-c5ac8908007b"
+      ]
+    },
+    "postgres": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "--network",
+        "host",
+        "crystaldba/postgres-mcp",
+        "postgresql://mushi:Mushi_zynq1@34.41.176.77:5432/git_forum"
+      ]
+    },
+    "docker": {
+      "command": "/home/pumopup5/.local/bin/uv",
+      "args": [
+        "--directory",
+        "/mnt/git-data/mcp-servers/src/docker",
+        "run",
+        "docker-mcp"
+      ]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@latest"
+      ]
+    }
+  }
+}

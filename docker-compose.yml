@@ -10,6 +10,7 @@ services:
     depends_on:
       - web
       - frontend
+    command: "/bin/sh -c 'nginx -g \"daemon off;\"'"
 
   # 2. FRONTEND
   frontend:
@@ -17,8 +18,6 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    ports:
-      - "3000:3000"
 
   # 3. BACKEND (Django)
   web:
@@ -28,19 +27,15 @@ services:
       - ./backend:/app
       - /mnt/git-data:/git-data
       - static_volume:/app/staticfiles
-    # 👇 ИСПРАВЛЕНО: Указываем точный путь к файлу внутри папки backend
     env_file:
       - ./backend/.env
     environment:
-      # Оставляем настройки БД (они переопределят .env, если отличаются)
       - DB_HOST=34.41.176.77
       - DB_PORT=5432
       - DB_NAME=git_forum
       - DB_USER=mushi
       - DB_PASS=Mushi_zynq1
       - CELERY_BROKER_URL=redis://redis:6379/0
-      # 👇 УБРАЛИ N8N переменные отсюда. 
-      # Docker сам возьмет их из env_file выше.
     depends_on:
       - redis
 
@@ -51,11 +46,9 @@ services:
     volumes:
       - ./backend:/app
       - /mnt/git-data:/git-data
-    # 👇 ИСПРАВЛЕНО: Точный путь
     env_file:
       - ./backend/.env
     environment:
-      # Тоже убрали лишнее, оставили только системные переменные
       - DB_HOST=34.41.176.77
       - DB_PORT=5432
       - DB_NAME=git_forum

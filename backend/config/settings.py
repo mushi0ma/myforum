@@ -7,13 +7,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-change-me-in-prod')
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+# Локальная разработка: разрешаем все или только localhost
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "web"]
 
-# === CORS (ВАЖНО ДЛЯ REACT) ===
-# Разрешаем запросы с любых доменов (для разработки)
-CORS_ALLOW_ALL_ORIGINS = True
+# === CORS ===
+CORS_ALLOW_ALL_ORIGINS = True # Для локальной разработки проще разрешить все, или перечислить localhost
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
 CORS_ALLOW_CREDENTIALS = True
-# Разрешаем заголовки, которые использует n8n client
 CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
@@ -24,8 +27,19 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
-    'x-auth-token', # Наш кастомный заголовок для n8n (если вдруг фронт будет слать его)
+    'x-auth-token',
 ]
+
+# === SECURITY ===
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
+X_FRAME_OPTIONS = 'DENY'
+
+# SSL/HTTPS - Отключено
+SECURE_SSL_REDIRECT = False
+SECURE_HSTS_SECONDS = 0
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
 
 # === REDIS & CACHE ===
 CACHES = {
@@ -38,10 +52,9 @@ CACHES = {
     }
 }
 
-# Сессии в Redis
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"
-SESSION_COOKIE_AGE = 1209600 # 2 недели
+SESSION_COOKIE_AGE = 1209600 
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -51,8 +64,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sites", 
-
-    # Allauth
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -60,29 +71,24 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.github',
     'allauth.socialaccount.providers.gitlab',
     'allauth.socialaccount.providers.discord',
-    
-    # API Auth
     'dj_rest_auth',
     'dj_rest_auth.registration',
-
-    # Сторонние библиотеки
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
     'django_filters',
     'drf_spectacular',
-
-    # Наше приложение
     'taggit',
     'forum',
     'core',
 ]
 
 MIDDLEWARE = [
+    "django.middleware.gzip.GZipMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "corsheaders.middleware.CorsMiddleware", # CORS должен быть высоко
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -110,7 +116,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-# БАЗА ДАННЫХ
 if os.environ.get('DB_HOST'):
     DATABASES = {
         'default': {
@@ -148,7 +153,6 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# CELERY & REDIS
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://redis:6379/0')
 CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://redis:6379/0')
 CELERY_ACCEPT_CONTENT = ['json']
@@ -156,18 +160,14 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
 
-# CELERY BEAT - Периодические задачи
 CELERY_BEAT_SCHEDULE = {
     'update-trending-scores-every-15-minutes': {
         'task': 'forum.tasks.update_trending_scores',
-        'schedule': 900.0,  # 15 минут в секундах
-        'options': {
-            'expires': 600,  # Задача истекает через 10 минут если не выполнена
-        }
+        'schedule': 900.0,
+        'options': { 'expires': 600 }
     },
 }
 
-# DRF (API)
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
@@ -178,9 +178,18 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
     ),
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+        'rest_framework.throttling.ScopedRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/day',
+        'user': '1000/hour',
+        'login': '5/min',
+    }
 }
 
-# SWAGGER
 SPECTACULAR_SETTINGS = {
     'TITLE': 'GitForum API',
     'DESCRIPTION': 'API для системы контроля версий',
@@ -190,26 +199,11 @@ SPECTACULAR_SETTINGS = {
 
 SITE_ID = 1 
 
-# --- SOCIAL ACCOUNT PROVIDERS ---
 SOCIALACCOUNT_PROVIDERS = {
-    'discord': {
-        'SCOPE': ['identify', 'email'],
-        'AUTH_PARAMS': {'prompt': 'none'},
-        'VERIFIED_EMAIL': True, 
-    },
-    'github': {
-        'SCOPE': ['user', 'user:email'],
-        'VERIFIED_EMAIL': True,
-    },
-    'gitlab': {
-        'SCOPE': ['read_user', 'openid', 'profile', 'email'],
-        'VERIFIED_EMAIL': True,
-    },
-    'google': {
-        'SCOPE': ['profile', 'email'],
-        'AUTH_PARAMS': {'access_type': 'online'},
-        'VERIFIED_EMAIL': True,
-    }
+    'discord': {'SCOPE': ['identify', 'email'], 'AUTH_PARAMS': {'prompt': 'none'}, 'VERIFIED_EMAIL': True},
+    'github': {'SCOPE': ['user', 'user:email'], 'VERIFIED_EMAIL': True},
+    'gitlab': {'SCOPE': ['read_user', 'openid', 'profile', 'email'], 'VERIFIED_EMAIL': True},
+    'google': {'SCOPE': ['profile', 'email'], 'AUTH_PARAMS': {'access_type': 'online'}, 'VERIFIED_EMAIL': True}
 }
 
 AUTHENTICATION_BACKENDS = [
@@ -217,7 +211,6 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-# --- ALLAUTH CONFIG ---
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
@@ -230,16 +223,11 @@ LOGIN_REDIRECT_URL = '/main'
 SOCIALACCOUNT_LOGIN_ON_GET = True
 SOCIALACCOUNT_ADAPTER = 'core.adapters.MySocialAccountAdapter'
 
-# --- JWT & COOKIES ---
 REST_USE_JWT = True
 JWT_AUTH_COOKIE = 'gitforum-auth'
 
-# --- NETWORK & SECURITY ---
-# Разрешаем кукам "гулять" свободнее, чтобы сессия не терялась при редиректах OAuth
 SESSION_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_SAMESITE = 'Lax'
-SESSION_COOKIE_SECURE = False  # Пока нет HTTPS
-CSRF_COOKIE_SECURE = False
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'http')
@@ -247,6 +235,4 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'http')
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "http://34.66.184.215.nip.io",
-    "https://34.66.184.215.nip.io",
 ]

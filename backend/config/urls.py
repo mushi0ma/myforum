@@ -1,11 +1,14 @@
 from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from core.views import CustomLoginView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
 
     # === API АВТОРИЗАЦИЯ (для React) ===
+    # Hardening: Кастомный логин с троттлингом 5/min
+    path('api/auth/login/', CustomLoginView.as_view(), name='rest_login'),
     # Вход, выход, смена пароля, получение user info
     path('api/auth/', include('dj_rest_auth.urls')),
     # Регистрация

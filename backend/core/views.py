@@ -2,9 +2,18 @@ from rest_framework import viewsets, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from dj_rest_auth.views import LoginView
 from .models import Repositories, Commits
 from .serializers import RepositorySerializer, CommitSerializer
 from .services.n8n_client import N8nClient
+
+# === CUSTOM AUTH VIEWS (Hardening) ===
+
+class CustomLoginView(LoginView):
+    """
+    Кастомный вход с жестким лимитом попыток (5/min).
+    """
+    throttle_scope = 'login'
 
 # === STANDARD API VIEWSETS (CRUD) ===
 

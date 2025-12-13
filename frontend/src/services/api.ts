@@ -51,6 +51,12 @@ export interface ExploreParams {
   page_size?: number;
 }
 
+export interface SavedPost {
+  id: number;
+  post: ForumPost;
+  saved_at: string;
+}
+
 export const forumApi = {
   /**
    * Получить трендовые посты (сортировка по trending_score)
@@ -66,7 +72,8 @@ export const forumApi = {
       throw new Error(`Failed to fetch trending posts: ${response.statusText}`);
     }
 
-    return await response.json();
+    const data = await response.json();
+    return Array.isArray(data) ? data : data.results || [];
   },
 
   /**
@@ -94,7 +101,8 @@ export const forumApi = {
       throw new Error(`Failed to fetch explore posts: ${response.statusText}`);
     }
 
-    return await response.json();
+    const data = await response.json();
+    return Array.isArray(data) ? data : data.results || [];
   },
 
   /**
@@ -215,6 +223,91 @@ export const forumApi = {
     }
     if (!response.ok) {
       throw new Error(`Failed to fork post: ${response.statusText}`);
+    }
+
+    return await response.json();
+  },
+
+  // ========== BOOKMARKS API ==========
+
+  /**
+   * Получить закладки пользователя
+   */
+  async getBookmarks(): Promise<SavedPost[]> {
+    const response = await fetch('/api/forum/bookmarks/', {
+      method: 'GET',
+      headers: getHeaders(),
+      credentials: 'include',
+    });
+
+    if (response.status === 401) {
+      throw new Error('Unauthorized: Please log in to view bookmarks');
+    }
+    if (!response.ok) {
+      throw new Error(`Failed to fetch bookmarks: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return Array.isArray(data) ? data : data.results || [];
+  },
+
+  /**
+   * Добавить пост в закладки
+   */
+  async savePost(postId: number): Promise<SavedPost> {
+    const response = await fetch('/api/forum/bookmarks/', {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ post_id: postId }),
+      credentials: 'include',
+    });
+
+    if (response.status === 401) {
+      throw new Error('Unauthorized: Please log in to save posts');
+    }
+    if (response.status === 409) {
+      throw new Error('Post already saved');
+    }
+    if (!response.ok) {
+      throw new Error(`Failed to save post: ${response.statusText}`);
+    }
+
+    return await response.json();
+  },
+
+  /**
+   * Удалить пост из закладок
+   */
+  async unsavePost(bookmarkId: number): Promise<void> {
+    const response = await fetch(`/api/forum/bookmarks/${bookmarkId}/`, {
+      method: 'DELETE',
+      headers: getHeaders(),
+      credentials: 'include',
+    });
+
+    if (response.status === 401) {
+      throw new Error('Unauthorized: Please log in');
+    }
+    if (!response.ok) {
+      throw new Error(`Failed to remove bookmark: ${response.statusText}`);
+    }
+  },
+
+  /**
+   * Toggle сохранения поста (через action на посте)
+   */
+  async toggleSavePost(postId: number): Promise<{ status: string; is_saved: boolean }> {
+    const response = await fetch(`${API_URL}/${postId}/save_post/`, {
+      method: 'POST',
+      headers: getHeaders(),
+      credentials: 'include',
+    });
+
+    if (response.status === 401) {
+      throw new Error('Unauthorized: Please log in to save posts');
+    }
+    if (!response.ok) {
+      throw new Error(`Failed to toggle save: ${response.statusText}`);
     }
 
     return await response.json();
